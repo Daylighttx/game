@@ -91,10 +91,10 @@
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalOptions>-zinx</AdditionalOptions>
+      <AdditionalOptions>-pthread</AdditionalOptions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>zinx</LibraryDependencies>
+      <LibraryDependencies>zinx;pthread;protobuf</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,6 +1,7 @@
 #pragma once
 #include <zinx.h>
 #include <google/protobuf/message.h>
+#include "msg.pb.h"
 
 class GameMsg :
 	public UserData
@@ -21,11 +22,19 @@ public:
 	} enMsgType;
 
 	/*已知消息内容创建消息对象*/
-	GameMsg(MSG_TYPE _type, google::protobuf::message* pMsg);
+	GameMsg(MSG_TYPE _type, google::protobuf::Message* pMsg);
 	GameMsg(MSG_TYPE _type, std::string _stream);
 
 	/*序列化本消息*/
 	std::string serialize();
 	virtual ~GameMsg();
+};
+
+class MultiMsg 
+	:public UserData 
+{
+public:
+	std::list<GameMsg *>m_Msgs;
+
 };
 
