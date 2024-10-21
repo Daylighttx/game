@@ -2,6 +2,7 @@
 #include "GameMsg.h"
 #include "GameChannel.h"
 #include "msg.pb.h"
+#include "GameRole.h"
 #include <iostream>
 
 
@@ -48,17 +49,7 @@ UserData* GameProtocol::raw2request(std::string _szInput)
 		/*弹出已经处理成功的报文*/
 		szLast.erase(0, 8 + iLength);
 	}
-
-	for (auto single : pRet->m_Msgs)
-	{
-		std::cout << single->pMsg->Utf8DebugString() << std::endl;
-	}
-
-	/*code below just for test*/
-	pb::Talk* pmsg = new pb::Talk();
-	pmsg->set_content("hello");
-	GameMsg* pGameMsg = new GameMsg(GameMsg::MSG_TYPE_CHAT_CONTENT, pmsg);
-	ZinxKernel::Zinx_SendOut(*(pGameMsg), *this);
+	
 
 	return pRet;
 }
@@ -94,7 +85,7 @@ std::string* GameProtocol::response2raw(UserData& _oUserData)
  
 Irole* GameProtocol::GetMsgProcessor(UserDataMsg& _oUserDataMsg)
 {
-	return nullptr;
+	return m_Role;
 }
 
 /*返回数据发送的通道*/
