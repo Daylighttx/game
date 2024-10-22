@@ -14,7 +14,7 @@ public:
 class Grid
 {
 public:
-	std::list<Player*> m_player;
+	std::list<Player*> m_players;
 
 };
 

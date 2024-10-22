@@ -19,7 +19,59 @@ AOIWorld::AOIWorld(int _x_begin, int _x_end, int _y_begin, int _y_end, int _x_co
 
 std::list<Player*> AOIWorld::GetSrdPlayers(Player* _player)
 {
-	return std::list<Player*>();
+	std::list<Player*> ret;
+
+	/*计算所属编号*/
+	int grid_id = (_player->GetX() - x_begin) / x_width + (_player->GetY() - y_begin) / y_width * x_count;
+	/*判断具体情况，取出邻居网格的玩家*/
+	/*计算x，y在哪个网格*/
+	int x_index = grid_id % x_count;
+	int y_index = grid_id / x_count;
+
+	if (x_index > 0 && y_index > 0)
+	{
+		std::list<Player*>& cur_list = m_grids[grid_id - 1 - x_count].m_players;
+		ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	}
+	if (y_index > 0)
+	{
+		std::list<Player*>& cur_list = m_grids[grid_id - x_count].m_players;
+		ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	}
+	if (x_index < x_count - 1 && y_index>0)
+	{
+		std::list<Player*>& cur_list = m_grids[grid_id - x_count + 1].m_players;
+		ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	}
+	if (x_index > 0)
+	{
+		std::list<Player*>& cur_list = m_grids[grid_id - 1].m_players;
+		ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	}
+	std::list<Player*>& cur_list = m_grids[grid_id].m_players;
+	ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	if (x_index < x_count - 1)
+	{
+		std::list<Player*>& cur_list = m_grids[grid_id + 1].m_players;
+		ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	}
+	if (x_index > 0 && y_index < y_count - 1)
+	{
+		std::list<Player*>& cur_list = m_grids[grid_id + x_count - 1].m_players;
+		ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	}
+	if (y_index < y_count - 1)
+	{
+		std::list<Player*>& cur_list = m_grids[grid_id + x_count].m_players;
+		ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	}
+	if (x_index < x_count - 1 && y_index < y_count - 1)
+	{
+		std::list<Player*>& cur_list = m_grids[grid_id + x_count + 1].m_players;
+		ret.insert(ret.begin(), cur_list.begin(), cur_list.end());
+	}
+
+	return ret;
 }
 
 bool AOIWorld::AddPlayer(Player* _player)
@@ -30,7 +82,7 @@ bool AOIWorld::AddPlayer(Player* _player)
 	int grid_id = (_player->GetX() - x_begin) / x_width + (_player->GetY() - y_begin) / y_width * x_count;
 
 	/*添加到该网格中*/
-	m_grids[grid_id].m_player.push_back(_player);
+	m_grids[grid_id].m_players.push_back(_player);
 
 	return true;
 }
@@ -39,5 +91,5 @@ void AOIWorld::DelPlayer(Player* _player)
 {
 	int grid_id = (_player->GetX() - x_begin) / x_width + (_player->GetY() - y_begin) / y_width * x_count;
 
-	m_grids[grid_id].m_player.remove(_player);
+	m_grids[grid_id].m_players.remove(_player);
 }
