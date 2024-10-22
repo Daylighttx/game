@@ -17,12 +17,62 @@ GameMsg* GameRole::CreateIDNameLogin()
     pmsg->set_pid(iPid);
     pmsg->set_username(szName);
     GameMsg* pRet = new GameMsg(GameMsg::MSG_TYPE_LOGIN_ID_NAME, pmsg);
-    return nullptr;
+    return pRet;
+}
+
+GameMsg* GameRole::CreateSrdPlayers()
+{
+    pb::SyncPlayers* pMsg = new pb::SyncPlayers();
+    auto srd_list = world.GetSrdPlayers(this);
+
+    for (auto single : srd_list)
+    {
+        auto pPlayer = pMsg->add_ps();
+        auto pRole = dynamic_cast<GameRole*>(single);
+        pPlayer->set_pid(pRole->iPid);
+        pPlayer->set_username(pRole->szName);
+        auto pPosition = pPlayer->mutable_p();
+        pPosition->set_x(pRole->x);
+        pPosition->set_y(pRole->y);
+        pPosition->set_z(pRole->z);
+        pPosition->set_v(pRole->v);
+    }
+    GameMsg* pret = new GameMsg(GameMsg::MSG_TYPE_SRD_POSITION, pMsg);
+    return pret;
+}
+
+GameMsg* GameRole::CreateSelfPosition()
+{
+    pb::BroadCast* pMsg = new pb::BroadCast();
+    pMsg->set_pid(iPid);
+    pMsg->set_username(szName);
+    //表示发送消息为初始位置
+    pMsg->set_tp(2);
+
+    auto pPosition = pMsg->mutable_p();
+    pPosition->set_x(x);
+    pPosition->set_y(y);
+    pPosition->set_z(z);
+    pPosition->set_v(v);
+
+
+    GameMsg* pret = new GameMsg(GameMsg::MSG_TYPE_BROADCAST, pMsg);
+    return pret;
+}
+
+GameMsg* GameRole::CreateIDNameLogoff()
+{
+    pb::SyncPid* pmsg = new pb::SyncPid();
+    pmsg->set_pid(iPid);
+    pmsg->set_username(szName);
+    GameMsg* pRet = new GameMsg(GameMsg::MSG_TYPE_LOGOFF_ID_NAME, pmsg);
+    return pRet;
 }
 
 GameRole::GameRole()
 {
-    
+    x = 100;
+    z = 100;
     szName = "Tom";
 }
 
@@ -43,6 +93,17 @@ bool GameRole::Init()
     {
         auto pmsg = CreateIDNameLogin();
         ZinxKernel::Zinx_SendOut(*pmsg, *m_pProto);
+        /*向自己发送周围玩家的位置*/
+        pmsg = CreateSrdPlayers();
+        ZinxKernel::Zinx_SendOut(*pmsg, *m_pProto);
+        /*向周围玩家发送其位置*/
+        auto srd_list = world.GetSrdPlayers(this);
+        for (auto single : srd_list)
+        {
+            pmsg = CreateSelfPosition();
+            auto pRole = dynamic_cast<GameRole*>(single);
+            ZinxKernel::Zinx_SendOut(*pmsg, *(pRole->m_pProto));
+        }
     }
 
     return bRet;
@@ -63,6 +124,15 @@ UserData* GameRole::ProcMsg(UserData& _poUserData)
 
 void GameRole::Fini()
 {
+    /*向周围玩家发送下线消息*/
+    auto srd_list = world.GetSrdPlayers(this);
+    for (auto single : srd_list)
+    {
+        auto pMsg = CreateIDNameLogoff();
+        auto pRole = dynamic_cast<GameRole*>(single);
+        ZinxKernel::Zinx_SendOut(*pMsg, *(pRole->m_pProto));
+    }
+
     world.DelPlayer(this);
 }
 

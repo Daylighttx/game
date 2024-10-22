@@ -10,6 +10,19 @@
 返回值是转换后的消息对象MultiMsg
 转换方式， TCP粘包处理*/
 
+GameProtocol::GameProtocol()
+{
+}
+
+GameProtocol::~GameProtocol()
+{
+	if (NULL != m_Role)
+	{
+		ZinxKernel::Zinx_Del_Role(*m_Role);
+		delete m_Role;
+	}
+}
+
 UserData* GameProtocol::raw2request(std::string _szInput)
 {
 	MultiMsg* pRet = new MultiMsg();

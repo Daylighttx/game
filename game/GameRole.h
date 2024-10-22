@@ -16,6 +16,9 @@ class GameRole :
     int iPid = 0;
     std::string szName;
     GameMsg* CreateIDNameLogin();
+    GameMsg* CreateSrdPlayers();
+    GameMsg* CreateSelfPosition();
+    GameMsg* CreateIDNameLogoff();
 public:
     GameRole();
     virtual ~GameRole();
