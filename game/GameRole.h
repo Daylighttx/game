@@ -20,6 +20,10 @@ class GameRole :
     GameMsg* CreateSelfPosition();
     GameMsg* CreateIDNameLogoff();
     GameMsg* CreateTalkBroadCast(std::string _content);
+    void ProcTalkMsg(std::string _content);
+    void ProcMoveMsg(float _x, float _y, float _z, float _v);
+    void ViewAppear(GameRole* _pRole);
+    void ViewLost(GameRole* _pRole);
 public:
     GameRole();
     virtual ~GameRole();
