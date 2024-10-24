@@ -69,6 +69,18 @@ GameMsg* GameRole::CreateIDNameLogoff()
     return pRet;
 }
 
+GameMsg* GameRole::CreateTalkBroadCast(std::string _content)
+{
+    pb::BroadCast* pmsg = new pb::BroadCast();
+    pmsg->set_pid(iPid);
+    pmsg->set_username(szName);
+    pmsg->set_tp(1);
+    pmsg->set_content(_content);
+    GameMsg* pRet = new GameMsg(GameMsg::MSG_TYPE_BROADCAST, pmsg);
+    return pRet;
+}
+
+
 GameRole::GameRole()
 {
     x = 100;
@@ -116,6 +128,20 @@ UserData* GameRole::ProcMsg(UserData& _poUserData)
     GET_REF2DATA(MultiMsg, input, _poUserData);
     for (auto single : input.m_Msgs)
     {
+        //取出聊天消息
+        if (single->enMsgType == GameMsg::MSG_TYPE_CHAT_CONTENT)
+        {
+            /*取出聊天内容*/
+            auto content = dynamic_cast<pb::Talk*>(single->pMsg)->content();
+            //发给所有人
+            auto role_list = ZinxKernel::Zinx_GetAllRole();
+            for (auto pRole : role_list)
+            {
+                auto pGameRole = dynamic_cast<GameRole*>(pRole);
+                auto pmsg = CreateTalkBroadCast(content);
+                ZinxKernel::Zinx_SendOut(*pmsg, *(pGameRole->m_pProto));
+            }
+        }
         std::cout << "type: " << single->enMsgType << std::endl;
         std::cout << single->pMsg->Utf8DebugString() << std::endl;
     }
