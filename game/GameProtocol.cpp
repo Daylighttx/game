@@ -61,8 +61,8 @@ UserData* GameProtocol::raw2request(std::string _szInput)
 		pRet->m_Msgs.push_back(pMsg);
 		/*弹出已经处理成功的报文*/
 		szLast.erase(0, 8 + iLength);
+		
 	}
-	
 
 	return pRet;
 }

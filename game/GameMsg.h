@@ -34,6 +34,8 @@ class MultiMsg
 	:public UserData 
 {
 public:
+	MultiMsg();
+	virtual ~MultiMsg();
 	std::list<GameMsg *>m_Msgs;
 
 };

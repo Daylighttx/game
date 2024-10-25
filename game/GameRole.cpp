@@ -6,6 +6,7 @@
 #include "GameProtocol.h"
 #include "GameChannel.h"
 #include <algorithm>
+#include <random>
 
 /*创建游戏世界全局对象*/
 static AOIWorld world(0, 400, 0, 400, 20, 20);
@@ -170,11 +171,12 @@ void GameRole::ViewLost(GameRole* _pRole)
     ZinxKernel::Zinx_SendOut(*pmsg, *(_pRole->m_pProto));
 }
 
+static std::default_random_engine random_engine(time(NULL));
 
 GameRole::GameRole()
 {
-    x = 100;
-    z = 100;
+    x = 100 + random_engine() % 50;
+    z = 100 + random_engine() % 50;
     szName = "Tom";
 }
 
