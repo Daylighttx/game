@@ -9,6 +9,7 @@
 #include <random>
 #include "ZinxTimer.h"
 #include "RandomName.h"
+#include <fstream>
 
 /*创建随机姓名池全局对象*/
 RandomName random_name;
@@ -233,6 +234,10 @@ bool GameRole::Init()
         }
     }
 
+    /*以追加形式，记录当前姓名到文件*/
+    std::ofstream name_record("/tmp/name_record",std::ios::app);
+    name_record << szName << std::endl;
+
     return bRet;
 }
 
@@ -282,6 +287,26 @@ void GameRole::Fini()
     {
         //起退出定时器
         TimerOutMng::GetInstance().AddTask(&g_exit_timer);
+    }
+
+    /*从文件中删掉姓名*/
+    /*1 从文件中读到所有姓名*/
+    std::list<std::string> cur_name_list;
+    std::ifstream input_stream("/tmp/name_record");
+    std::string tmp;
+    while (getline(input_stream, tmp))
+    {
+        cur_name_list.push_back(tmp);
+    }
+    /*2 删除当前姓名*/
+    /*3 写入其余姓名*/
+    std::ofstream output_stream("/tmp/name_record");
+    for (auto name : cur_name_list)
+    {
+        if (name != szName)
+        {
+            output_stream << name << std::endl;
+        }
     }
 }
 
