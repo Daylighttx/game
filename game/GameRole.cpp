@@ -10,6 +10,7 @@
 #include "ZinxTimer.h"
 #include "RandomName.h"
 #include <fstream>
+#include <hiredis/hiredis.h>
 
 /*创建随机姓名池全局对象*/
 RandomName random_name;
@@ -235,11 +236,26 @@ bool GameRole::Init()
     }
 
     /*以追加形式，记录当前姓名到文件*/
-    std::ofstream name_record("/tmp/name_record",std::ios::app);
-    name_record << szName << std::endl;
+    /*std::ofstream name_record("/tmp/name_record",std::ios::app);
+    name_record << szName << std::endl;*/
+
+    /*记录当前姓名到redis的game_name*/
+    /*1. 连接redis*/
+    auto context = redisConnect("127.0.0.1", 6379);
+    /*2. 发送lpush命令*/
+    if (NULL != context)
+    {
+        freeReplyObject(redisCommand(context, "lpush game_name %s", szName.c_str()));
+        redisFree(context);
+    }
+
+
 
     return bRet;
 }
+
+
+
 
 /*处理游戏相关的用户请求*/
 UserData* GameRole::ProcMsg(UserData& _poUserData)
@@ -289,25 +305,33 @@ void GameRole::Fini()
         TimerOutMng::GetInstance().AddTask(&g_exit_timer);
     }
 
+    /*从redis game_name中删掉当前姓名*/
+    auto context = redisConnect("127.0.0.1", 6379);
+    if (NULL != context)
+    {
+         freeReplyObject(redisCommand(context, "lrem game_name 1 %s", szName.c_str()));
+         redisFree(context);
+    }
+
     /*从文件中删掉姓名*/
     /*1 从文件中读到所有姓名*/
-    std::list<std::string> cur_name_list;
-    std::ifstream input_stream("/tmp/name_record");
-    std::string tmp;
-    while (getline(input_stream, tmp))
-    {
-        cur_name_list.push_back(tmp);
-    }
-    /*2 删除当前姓名*/
-    /*3 写入其余姓名*/
-    std::ofstream output_stream("/tmp/name_record");
-    for (auto name : cur_name_list)
-    {
-        if (name != szName)
-        {
-            output_stream << name << std::endl;
-        }
-    }
+    //std::list<std::string> cur_name_list;
+    //std::ifstream input_stream("/tmp/name_record");
+    //std::string tmp;
+    //while (getline(input_stream, tmp))
+    //{
+    //    cur_name_list.push_back(tmp);
+    //}
+    ///*2 删除当前姓名*/
+    ///*3 写入其余姓名*/
+    //std::ofstream output_stream("/tmp/name_record");
+    //for (auto name : cur_name_list)
+    //{
+    //    if (name != szName)
+    //    {
+    //        output_stream << name << std::endl;
+    //    }
+    //}
 }
 
 int GameRole::GetX()

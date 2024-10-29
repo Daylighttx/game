@@ -104,7 +104,7 @@
       <AdditionalOptions>-pthread</AdditionalOptions>
     </ClCompile>
     <Link>
-      <LibraryDependencies>zinx;pthread;protobuf</LibraryDependencies>
+      <LibraryDependencies>zinx;pthread;protobuf;hiredis</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
